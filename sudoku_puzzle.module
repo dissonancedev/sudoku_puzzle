@@ -1,0 +1,87 @@
+<?php
+/**
+ * @file
+ * Sudoku puzzle module.
+ * @author Nikos Parastatidis <nparasta@gmail.com>
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function sudoku_puzzle_menu() {
+  $items = array();
+
+  $items['sudoku_puzzle/api'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => '_sudoku_puzzle_api_request',
+    'access arguments' => array('access content'),
+    'file' => 'sudoku_puzzle.api.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function sudoku_puzzle_theme() {
+  $items = array();
+
+  $items['sudoku_puzzle'] = array(
+    'template' => 'sudoku-puzzle',
+    'variables' => array('variables' => NULL),
+    'path' => drupal_get_path('module', 'sudoku_puzzle') . '/templates',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function sudoku_puzzle_block_info() {
+  $blocks = array();
+
+  $blocks['sudoku_puzzle_block'] = array(
+    'info' => t('SuDoKu puzzle'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function sudoku_puzzle_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'sudoku_puzzle_block':
+      // Add necessary styling and JS.
+      drupal_add_css(drupal_get_path('module', 'sudoku_puzzle') . '/css/sudoku_puzzle.css');
+      $levels = _sudoku_puzzle_set_levels_js();
+      drupal_add_js(drupal_get_path('module', 'sudoku_puzzle') . '/js/sudoku_puzzle.js');
+
+      // Set content.
+      $block['subject'] = '';
+      $block['content'] = theme('sudoku_puzzle', array('levels' => $levels));
+      break;
+  }
+
+  return $block;
+}
+
+function _sudoku_puzzle_set_levels_js() {
+  require_once 'inc/SudokuPuzzle.php';
+
+  $levels = array(
+    LEVEL_VERY_EASY => t('Very easy'),
+    LEVEL_EASY => t('Easy'),
+    LEVEL_MEDIUM => t('Medium'),
+    LEVEL_DIFFICULT => t('Difficult'),
+    LEVEL_EVIL => t('Evil'),
+  );
+  drupal_add_js(array('sudokuPuzzle' => array('levels' => $levels)), 'setting');
+
+  return $levels;
+}
