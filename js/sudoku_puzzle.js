@@ -39,6 +39,7 @@
             }
             else {
               $cells.eq(j - 1).children('span').text('');
+              $cells.eq(j - 1).removeClass('puzzle-cell-locked');
             }
           });
         });
