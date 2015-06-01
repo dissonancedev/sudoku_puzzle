@@ -1277,13 +1277,233 @@ class SudokuPuzzle {
   /**
    * Generate a unique-solvable puzzle.
    *
+   * Generate a unique-solvable puzzle with in easy or very easy mode.
+   *
+   * @param int $difficulty
+   *   Very easy, easy
+   *
+   * @ingroup ai
+   */
+  public function generateEasy($difficulty = LEVEL_VERY_EASY) {
+    $cells_checked = array();
+
+    // Set restrictions.
+    $range_givens = ($difficulty == LEVEL_VERY_EASY) ? array(50, 64) : array(36, 49);
+    list($min, $max) = $range_givens;
+    $givens = self::sRand($min, $max);
+    $min_givens = ($difficulty == LEVEL_VERY_EASY) ? 5 : 4;
+    while (count($cells_checked) < 81) {
+      // We select a point.
+      $r = self::sRand();
+      $c = self::sRand();
+
+      // If we have walked this cell before then try again.
+      if (in_array(array($r, $c), $cells_checked)) {
+        continue;
+      }
+      else {
+        $cells_checked[] = array($r, $c);
+      }
+
+      // We check if digging this cell would violate restrictions.
+      // Total givens. If it would then we're finished.
+      if ($this->getGivensCount() - 1 < $givens) {
+        break;
+      }
+
+      // Row minimum givens.
+      $row = $this->getRow($r);
+      $count = self::countArrayGivens($row) - 1;
+      if ($count < $min_givens) {
+        continue;
+      }
+
+      // Column minimum givens.
+      $col = $this->getCol($c);
+      $count = self::countArrayGivens($col) - 1;
+      if ($count < $min_givens) {
+        continue;
+      }
+
+      // We try to dig and see if it yields a unique solution.
+      $num = $this->puzzle[$r][$c];
+      $unique = TRUE;
+      for ($t = 1; $t <= 9; $t++) {
+        if ($t != $num && $this->satisfiesRules($r, $c, $t)) {
+          $this->puzzle[$r][$c] = $t;
+          if ($this->isSolvable()) {
+            $unique = FALSE;
+          }
+        }
+      }
+
+      $this->puzzle[$r][$c] = ($unique) ? 0 : $num;
+    }
+  }
+
+  /**
+   * Generate a unique-solvable puzzle.
+   *
+   * Generate a unique-solvable puzzle with in medium mode.
+   *
+   * @ingroup ai
+   */
+  public function generateMedium() {
+    $range_givens = array(32, 35);
+    list($min, $max) = $range_givens;
+    $givens = self::sRand($min, $max);
+    $min_givens = 3;
+    for ($index = 1; $index <= 81; $index += 2) {
+      list($r, $c) = self::reverseRasterToCoord($index);
+
+      // We check if digging this cell would violate restrictions.
+      // Total givens. If it would then we're finished.
+      if ($this->getGivensCount() - 1 < $givens) {
+        break;
+      }
+
+      // Row minimum givens.
+      $row = $this->getRow($r);
+      $count = self::countArrayGivens($row) - 1;
+      if ($count < $min_givens) {
+        continue;
+      }
+
+      // Column minimum givens.
+      $col = $this->getCol($c);
+      $count = self::countArrayGivens($col) - 1;
+      if ($count < $min_givens) {
+        continue;
+      }
+
+      // We try to dig and see if it yields a unique solution.
+      $num = $this->puzzle[$r][$c];
+      $unique = TRUE;
+      for ($t = 1; $t <= 9; $t++) {
+        if ($t != $num && $this->satisfiesRules($r, $c, $t)) {
+          $this->puzzle[$r][$c] = $t;
+          if ($this->isSolvable()) {
+            $unique = FALSE;
+          }
+        }
+      }
+
+      $this->puzzle[$r][$c] = ($unique) ? 0 : $num;
+    }
+  }
+
+  /**
+   * Generate a unique-solvable puzzle.
+   *
+   * Generate a unique-solvable puzzle with in difficult mode.
+   *
+   * @ingroup ai
+   */
+  public function generateDifficult() {
+    $range_givens = array(28, 31);
+    list($min, $max) = $range_givens;
+    $givens = self::sRand($min, $max);
+    $min_givens = 2;
+    for ($index = 1; $index <= 81; $index++) {
+      list($r, $c) = self::reverseRasterToCoord($index);
+
+      // We check if digging this cell would violate restrictions.
+      // Total givens. If it would then we're finished.
+      if ($this->getGivensCount() - 1 < $givens) {
+        break;
+      }
+
+      // Row minimum givens.
+      $row = $this->getRow($r);
+      $count = self::countArrayGivens($row) - 1;
+      if ($count < $min_givens) {
+        continue;
+      }
+
+      // Column minimum givens.
+      $col = $this->getCol($c);
+      $count = self::countArrayGivens($col) - 1;
+      if ($count < $min_givens) {
+        continue;
+      }
+
+      // We try to dig and see if it yields a unique solution.
+      $num = $this->puzzle[$r][$c];
+      $unique = TRUE;
+      for ($t = 1; $t <= 9; $t++) {
+        if ($t != $num && $this->satisfiesRules($r, $c, $t)) {
+          $this->puzzle[$r][$c] = $t;
+          if ($this->isSolvable()) {
+            $unique = FALSE;
+          }
+        }
+      }
+
+      $this->puzzle[$r][$c] = ($unique) ? 0 : $num;
+    }
+  }
+
+  /**
+   * Generate a unique-solvable puzzle.
+   *
+   * Generate a unique-solvable puzzle with in evil mode. \m/
+   *
+   * @ingroup ai
+   */
+  public function generateEvil() {
+    $range_givens = array(22, 27);
+    list($min, $max) = $range_givens;
+    $givens = self::sRand($min, $max);
+    $min_givens = 0;
+    for ($index = 1; $index <= 81; $index++) {
+      // We check if digging this cell would violate restrictions.
+      // Total givens. If it would then we're finished.
+      if ($this->getGivensCount() - 1 < $givens) {
+        break;
+      }
+
+      list($r, $c) = self::rasterOrderToCoord($index);
+
+      // Row minimum givens.
+      $row = $this->getRow($r);
+      $count = self::countArrayGivens($row) - 1;
+      if ($count < $min_givens) {
+        continue;
+      }
+
+      // Column minimum givens.
+      $col = $this->getCol($c);
+      $count = self::countArrayGivens($col) - 1;
+      if ($count < $min_givens) {
+        continue;
+      }
+
+      // We try to dig and see if it yields a unique solution.
+      $num = $this->puzzle[$r][$c];
+      $unique = TRUE;
+      for ($t = 1; $t <= 9; $t++) {
+        if ($t != $num && $this->satisfiesRules($r, $c, $t)) {
+          $this->puzzle[$r][$c] = $t;
+          if ($this->isSolvable()) {
+            $unique = FALSE;
+          }
+        }
+      }
+
+      $this->puzzle[$r][$c] = ($unique) ? 0 : $num;
+    }
+  }
+
+  /**
+   * Generate a unique-solvable puzzle.
+   *
    * Generate a unique-solvable puzzle with adjustable difficulty.
    *
    * @param int $difficulty
-   *   Row number from 1 to 3
+   *   Very easy, easy, medium, difficult, evil
    *
    * @return bool
-   *   An array of (global) cell coordinates.
+   *   Generation succeeded or not
    *
    * @ingroup ai
    */
@@ -1303,86 +1523,19 @@ class SudokuPuzzle {
     // Walk the board in different ways
     // according to selected difficulty level.
     if ($difficulty == LEVEL_VERY_EASY || $difficulty == LEVEL_EASY) {
-      $cells_checked = array();
-
-      // Set restrictions.
-      $range_givens = ($difficulty == LEVEL_VERY_EASY) ? array(50, 64) : array(36, 49);
-      list($min, $max) = $range_givens;
-      $givens = self::sRand($min, $max);
-      $min_givens = ($difficulty == LEVEL_VERY_EASY) ? 5 : 4;
-      while (count($cells_checked) < 81) {
-        // We select a point.
-        $r = self::sRand();
-        $c = self::sRand();
-
-        if (in_array(array($r, $c), $cells_checked)) {
-          continue;
-        }
-        else {
-          $cells_checked[] = array($r, $c);
-        }
-
-        // We check if digging this cell would violate restrictions.
-        // Total givens. If it would then we're finished.
-        if ($this->getGivensCount() - 1 < $givens) {
-          break;
-        }
-
-        // Row minimum givens.
-        $row = $this->getRow($r);
-        $count = self::countArrayGivens($row) - 1;
-        if ($count < $min_givens) {
-          continue;
-        }
-
-        // Column minimum givens.
-        $col = $this->getCol($c);
-        $count = self::countArrayGivens($col) - 1;
-        if ($count < $min_givens) {
-          continue;
-        }
-
-        // We try to dig and see if it yields a solution.
-        $num = $this->puzzle[$r][$c];
-        $this->puzzle[$r][$c] = 0;
-        if (!$this->isSolvable()) {
-          $this->puzzle[$r][$c] = $num;
-          continue;
-        }
-      }
+      $this->generateEasy($difficulty);
     }
     elseif ($difficulty == LEVEL_MEDIUM) {
-      $range_givens = array(32, 35);
-      list($min, $max) = $range_givens;
-      $givens = self::sRand($min, $max);
-      $min_givens = 3;
-      for ($index = 1; $index <= 81; $index += 2) {
-        list($r, $c) = self::reverseRasterToCoord($index);
-
-      }
+      $this->generateMedium();
     }
     elseif ($difficulty == LEVEL_DIFFICULT) {
-      $range_givens = array(28, 31);
-      list($min, $max) = $range_givens;
-      $givens = self::sRand($min, $max);
-      $min_givens = 2;
-      for ($index = 1; $index <= 81; $index++) {
-        list($r, $c) = self::reverseRasterToCoord($index);
-
-      }
+      $this->generateDifficult();
     }
     elseif ($difficulty == LEVEL_EVIL) {
-      $range_givens = array(22, 27);
-      list($min, $max) = $range_givens;
-      $givens = self::sRand($min, $max);
-      $min_givens = 0;
-      for ($index = 1; $index <= 81; $index++) {
-        list($r, $c) = self::rasterOrderToCoord($index);
-
-      }
+      $this->generateEvil();
     }
 
-    return TRUE;
+    return $this->evaluateDifficulty();
   }
 
   /**
