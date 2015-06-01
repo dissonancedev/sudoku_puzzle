@@ -309,6 +309,30 @@ class SudokuPuzzle {
   }
 
   /**
+   * Counts the givens in row/column.
+   *
+   * Counts and returns how many givens exists in the given row/column.
+   *
+   * @param int $elem
+   *   Row/column.
+   *
+   * @return int
+   *   Number of givens
+   *
+   * @ingroup utility
+   */
+  protected static function countArrayGivens($elem) {
+    $count = 0;
+    foreach ($elem as $cell) {
+      if ($cell != 0) {
+        $count++;
+      }
+    }
+
+    return $count;
+  }
+
+  /**
    * Get minimum of gives in rows and columns.
    *
    * Returns the lowest number of givens found in a row/column.
@@ -1267,6 +1291,9 @@ class SudokuPuzzle {
     // Clear the board to begin with.
     $this->clearPuzzle();
 
+    // Set all the cells can-be-dug.
+    $this->lockBoard();
+
     // Firstly we generate a terminal pattern.
     $this->generateTerminalPattern();
 
@@ -1276,14 +1303,52 @@ class SudokuPuzzle {
     // Walk the board in different ways
     // according to selected difficulty level.
     if ($difficulty == LEVEL_VERY_EASY || $difficulty == LEVEL_EASY) {
-      $t = 0;
+      $cells_checked = array();
+
+      // Set restrictions.
       $range_givens = ($difficulty == LEVEL_VERY_EASY) ? array(50, 64) : array(36, 49);
       list($min, $max) = $range_givens;
       $givens = self::sRand($min, $max);
       $min_givens = ($difficulty == LEVEL_VERY_EASY) ? 5 : 4;
-      while ($t++ < 10) {
+      while (count($cells_checked) < 81) {
+        // We select a point.
         $r = self::sRand();
         $c = self::sRand();
+
+        if (in_array(array($r, $c), $cells_checked)) {
+          continue;
+        }
+        else {
+          $cells_checked[] = array($r, $c);
+        }
+
+        // We check if digging this cell would violate restrictions.
+        // Total givens. If it would then we're finished.
+        if ($this->getGivensCount() - 1 < $givens) {
+          break;
+        }
+
+        // Row minimum givens.
+        $row = $this->getRow($r);
+        $count = self::countArrayGivens($row) - 1;
+        if ($count < $min_givens) {
+          continue;
+        }
+
+        // Column minimum givens.
+        $col = $this->getCol($c);
+        $count = self::countArrayGivens($col) - 1;
+        if ($count < $min_givens) {
+          continue;
+        }
+
+        // We try to dig and see if it yields a solution.
+        $num = $this->puzzle[$r][$c];
+        $this->puzzle[$r][$c] = 0;
+        if (!$this->isSolvable()) {
+          $this->puzzle[$r][$c] = $num;
+          continue;
+        }
       }
     }
     elseif ($difficulty == LEVEL_MEDIUM) {
@@ -1317,7 +1382,7 @@ class SudokuPuzzle {
       }
     }
 
-    return $walk;
+    return TRUE;
   }
 
   /**

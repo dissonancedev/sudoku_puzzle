@@ -5,8 +5,6 @@
  * @author Nikos Parastatidis <nparasta@gmail.com>
  */
 
-require_once 'inc/SudokuPuzzle.php';
-
 function _sudoku_puzzle_api_request() {
   $command = $_REQUEST['command'];
   if (empty($command)) {
@@ -31,7 +29,7 @@ function _sudoku_puzzle_api_request_new_puzzle($options = array()) {
     $board = array('error' => t('Could not generate a puzzle'));
   }
 
-  return $puzzle;
+  return $board;
 }
 
 function _sudoku_puzzle_api_request_check($options = array()) {

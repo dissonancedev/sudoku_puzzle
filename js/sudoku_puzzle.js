@@ -35,6 +35,7 @@
             lockedPuzzle[i][j] = val;
             if (val > 0) {
               $cells.eq(j - 1).children('span').text(val);
+              $cells.eq(j - 1).addClass('puzzle-cell-locked');
             }
             else {
               $cells.eq(j - 1).children('span').text('');

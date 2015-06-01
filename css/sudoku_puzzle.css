@@ -16,6 +16,13 @@
   font-size: 2em;
 }
 
+.puzzle-cell-locked {
+  background-image: url("../img/stripe_bg.png");
+  background-repeat: repeat;
+  background-clip: padding-box;
+  opacity: 0.8;
+}
+
 .puzzle-cell-hint {
   background-color: green;
 }

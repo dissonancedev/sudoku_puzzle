@@ -2,3 +2,5 @@ name = SuDoKu Puzzle
 description = A full SuDoKu game with many cool features
 core = 7.x
 package = Games
+version = "7.x-1.0"
+files[] = inc/SudokuPuzzle.php
