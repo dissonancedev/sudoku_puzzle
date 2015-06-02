@@ -32,7 +32,7 @@ class SudokuPuzzle {
   protected $lockedPuzzle;
 
   /**
-   * Loop threshold for the solving algorithm.
+   * Loop threshold for the terminal pattern algorithm.
    * Makes sure it doesn't fall in infinite loop.
    */
   protected $loopThreshold;
@@ -1010,76 +1010,6 @@ class SudokuPuzzle {
   }
 
   /**
-   * Get candidates for box given a value.
-   *
-   * Scans and finds the candidates where the given value could be placed.
-   *
-   * @param int $x
-   *   Row number from 1 to 3
-   * @param int $y
-   *   Column number from 1 to 3
-   * @param int $val
-   *   The value to find candidates for
-   *
-   * @return bool
-   *   An array of (global) cell coordinates.
-   *
-   * @ingroup ai
-   */
-  protected function getCandidatesForBox($x, $y, $val) {
-    if ($this->boxHasValue($x, $y, $val)) {
-      return array();
-    }
-
-    $box = $this->getBox($x, $y);
-
-    $candidates = array();
-    foreach ($box as $r => $row) {
-      foreach ($row as $c => $cell) {
-
-        if ($cell == 0) {
-          if (!$this->rowHasValue($r, $val) && !$this->colHasValue($c, $val)) {
-            $candidates[] = array($r, $c);
-          }
-        }
-
-      }
-    }
-
-    return $candidates;
-  }
-
-  /**
-   * Find previous "unlocked" cells.
-   *
-   * Scans backwards and counts the previous cells
-   * that are unlocked.
-   *
-   * @param int $r
-   *   Row number from 1 to 9
-   * @param int $c
-   *   Column number from 1 to 9
-   *
-   * @return int
-   *   The number of unlocked cells found.
-   *
-   * @ingroup ai
-   */
-  protected function countEmpty($r, $c) {
-    $locked_raster = self::getBoardInRasterOrder($this->lockedPuzzle);
-    $index = self::coordToRasterOrder($r, $c);
-
-    $amount = 0;
-    for ($i = 1; $i < $index; $i++) {
-      if ($locked_raster[$i] == 0) {
-        $amount++;
-      }
-    }
-
-    return $amount;
-  }
-
-  /**
    * Lock puzzle.
    *
    * Basically creates a copy of the puzzle in which non-zero values
@@ -1209,9 +1139,9 @@ class SudokuPuzzle {
     // for solving the puzzle. This is not implemented here.
     // We calculate from the other 3 factor and share the missing
     // weight in between the two last factors.
-    $difficulty = round(0.4 * $total_givens_factor + 0.3 * $min_givens_factor + 0.3 * $search_factor);
+    $difficulty = 0.4 * $total_givens_factor + 0.3 * $min_givens_factor + 0.3 * $search_factor;
 
-    return (1 <= $difficulty && $difficulty <= 5) ? $difficulty : FALSE;
+    return $difficulty;
   }
 
   /**
@@ -1308,7 +1238,7 @@ class SudokuPuzzle {
       // We check if digging this cell would violate restrictions.
       // Total givens. If it would then we're finished.
       if ($this->getGivensCount() - 1 < $givens) {
-        break;
+        continue;
       }
 
       // Row minimum givens.
@@ -1359,7 +1289,7 @@ class SudokuPuzzle {
       // We check if digging this cell would violate restrictions.
       // Total givens. If it would then we're finished.
       if ($this->getGivensCount() - 1 < $givens) {
-        break;
+        continue;
       }
 
       // Row minimum givens.
@@ -1410,7 +1340,7 @@ class SudokuPuzzle {
       // We check if digging this cell would violate restrictions.
       // Total givens. If it would then we're finished.
       if ($this->getGivensCount() - 1 < $givens) {
-        break;
+        continue;
       }
 
       // Row minimum givens.
@@ -1456,13 +1386,13 @@ class SudokuPuzzle {
     $givens = self::sRand($min, $max);
     $min_givens = 0;
     for ($index = 1; $index <= 81; $index++) {
+      list($r, $c) = self::rasterOrderToCoord($index);
+
       // We check if digging this cell would violate restrictions.
       // Total givens. If it would then we're finished.
       if ($this->getGivensCount() - 1 < $givens) {
-        break;
+        continue;
       }
-
-      list($r, $c) = self::rasterOrderToCoord($index);
 
       // Row minimum givens.
       $row = $this->getRow($r);
