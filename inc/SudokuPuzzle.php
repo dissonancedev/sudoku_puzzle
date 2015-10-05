@@ -561,6 +561,63 @@ class SudokuPuzzle {
     return $col;
   }
 
+  /* TRANSFORMATION FUNCTIONS */
+
+  /**
+   * Swaps 2 columns belonging to the same block column.
+   *
+   * @param int $c1
+   *   First column to switch
+   * @param int $c2
+   *   Second column to switch
+   *
+   * @ingroup access
+   */
+  protected function swapColumns($c1, $c2) {
+    if (($c1 - 1) % 3 != ($c2 - 1) % 3) {
+      return FALSE;
+    }
+
+    $col1 = $this->getCol($c1);
+    $col2 = $this->getCol($c2);
+
+    for ($r = 1; $r <= 9; $r++) {
+      $this->puzzle[$r][$c1] = $col2[$r];
+      $this->puzzle[$r][$c2] = $col1[$r];
+    }
+  }
+
+  /**
+   * Swaps 2 block columns.
+   *
+   * @param int $c1
+   *   First column to switch
+   * @param int $c2
+   *   Second column to switch
+   *
+   * @ingroup access
+   */
+  protected function swapBlockColumns($c1, $c2) {
+    if ($c1 == $c2) {
+      return FALSE;
+    }
+
+    $col1 = array();
+    $col2 = array();
+    for ($i = 1; $i <= 3; $i++) {
+      $col1[($c1 - 1) * 3 + $i] = $this->getCol(($c1 - 1) * 3 + $i);
+      $col2[($c2 - 1) * 3 + $i] = $this->getCol(($c2 - 1) * 3 + $i);
+    }
+
+    foreach ($col1 as $col) {
+      for ($r = 1; $r <= 9; $r++) {
+        $this->puzzle[$r][$c1] = $col2[$r];
+        $this->puzzle[$r][$c2] = $col1[$r];
+      }
+    }
+  }
+
+
   /* VALIDATION FUNCTIONS */
 
   /**

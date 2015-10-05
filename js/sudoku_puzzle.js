@@ -97,7 +97,7 @@
           data: { command: 'new_puzzle', options: { level: $('#sudoku-puzzle-level').val() } },
           success: function( response ) {
             if (!response.error) {
-              setPuzzle(response);
+              setPuzzle(response.board);
             }
           }
         });

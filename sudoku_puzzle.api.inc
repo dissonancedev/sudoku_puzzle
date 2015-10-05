@@ -22,14 +22,19 @@ function _sudoku_puzzle_api_request() {
 function _sudoku_puzzle_api_request_new_puzzle($options = array()) {
   $puzzle_engine = new SudokuPuzzle();
   $difficulty_level = $options['level'];
-  $puzzle = $puzzle_engine->generate($difficulty_level);
+  $eval_diff = $puzzle_engine->generate($difficulty_level);
 
   $board = $puzzle_engine->getBoard();
   if (!$board) {
     $board = array('error' => t('Could not generate a puzzle'));
   }
 
-  return $board;
+  $response = array(
+    'board' => $board,
+    'difficulty_level' => $eval_diff,
+  );
+
+  return $response;
 }
 
 function _sudoku_puzzle_api_request_check($options = array()) {
